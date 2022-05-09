@@ -1,0 +1,27 @@
+﻿<Properties StartupConfiguration="{D3608D14-81E2-4581-BE3D-DB073B0FD169}|Default">
+  <MonoDevelop.Ide.ItemProperties.beeGameDiceSimulator PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="beeGameDiceSimulator/Simulation.cs">
+    <Files>
+      <File FileName="beeGameDiceSimulator/Program.cs" Line="26" Column="21" />
+      <File FileName="beeGameDiceSimulator/Simulation.cs" Line="32" Column="79" />
+      <File FileName="beeGameDiceSimulator/Config.cs" Line="24" Column="62" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="beeGameDiceSimulator" expanded="True">
+            <Node name="beeGameDiceSimulator" expanded="True">
+              <Node name="Simulation.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
