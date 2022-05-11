@@ -7,4 +7,4 @@ build_property.PublishSingleFile =
 build_property.IncludeAllContentForSelfExtract = 
 build_property._SupportedPlatformList = Android,iOS,Linux,macOS,Windows
 build_property.RootNamespace = beeGameDiceSimulator
-build_property.ProjectDir = /Users/Sean.Owen/Workspace/Playground/beeGameDiceSimulator/beeGameDiceSimulator/
+build_property.ProjectDir = /Users/Sean.Owen/Workspace/github.com/sean-owens/Playground/beeGameDiceSimulator/beeGameDiceSimulator/

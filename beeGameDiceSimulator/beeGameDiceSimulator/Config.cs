@@ -17,6 +17,9 @@ namespace beeGameDiceSimulator
         private const int NumOfSeasons = 4;
         private const int NumOfSpacesPerSeason = 3;
 
+        private const int InnerRingTotal = 19;
+        private const int OuterRingTotal = InnerRingTotal + 18;
+
         public Config()
         {
             _log = new LoggerConfiguration()
@@ -56,9 +59,29 @@ namespace beeGameDiceSimulator
             return NumOfSeasons * NumOfSpacesPerSeason;
         }
 
+        public int GetNumOfSpacesPerSeason()
+        {
+            return NumOfSpacesPerSeason;
+        }
+
+        public int GetNumOfSeasons()
+        {
+            return NumOfSeasons;
+        }
+
         public string GetLogsFileLocation()
         {
             return LogFileLocation;
+        }
+
+        public int GetInnerRingTotal()
+        {
+            return InnerRingTotal;
+        }
+
+        public int GetOuterRingTotal()
+        {
+            return OuterRingTotal;
         }
     }
 }

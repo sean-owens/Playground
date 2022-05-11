@@ -8,27 +8,29 @@
             int numOfDicePerRoll = 5;
             int numOfSimulations = 1000;
 
-            Simulation testD6Sim = new Simulation(numOfPlayers, "D6");
-            Simulation testD8Sim = new Simulation(numOfPlayers, "D8");
+            string d6Type = "D6";
+            string d8Type = "D8";
+
+            Simulation testSim = new Simulation();
 
             //5 Dice
-            testD6Sim.RunDiceSim(numOfDicePerRoll, numOfSimulations);
-            testD8Sim.RunDiceSim(numOfDicePerRoll, numOfSimulations);
+            testSim.RunDiceSim(d6Type, numOfDicePerRoll, numOfSimulations);
+            testSim.RunDiceSim(d8Type, numOfDicePerRoll, numOfSimulations);
 
             //6 Dice
-            testD6Sim.RunDiceSim(numOfDicePerRoll+1, numOfSimulations);
-            testD8Sim.RunDiceSim(numOfDicePerRoll+1, numOfSimulations);
+            testSim.RunDiceSim(d6Type, numOfDicePerRoll+1, numOfSimulations);
+            testSim.RunDiceSim(d8Type, numOfDicePerRoll+1, numOfSimulations);
 
             //7 Dice
-            testD6Sim.RunDiceSim(numOfDicePerRoll+2, numOfSimulations);
-            testD8Sim.RunDiceSim(numOfDicePerRoll+2, numOfSimulations);
+            testSim.RunDiceSim(d6Type, numOfDicePerRoll+2, numOfSimulations);
+            testSim.RunDiceSim(d8Type, numOfDicePerRoll+2, numOfSimulations);
 
             //8 Dice
-            testD6Sim.RunDiceSim(numOfDicePerRoll+3, numOfSimulations);
-            testD8Sim.RunDiceSim(numOfDicePerRoll+3, numOfSimulations);
+            testSim.RunDiceSim(d6Type, numOfDicePerRoll+3, numOfSimulations);
+            testSim.RunDiceSim(d8Type, numOfDicePerRoll+3, numOfSimulations);
 
-            testD6Sim.RunDiceSim(numOfDicePerRoll+4, numOfSimulations);
-            testD8Sim.RunDiceSim(numOfDicePerRoll+4, numOfSimulations);
+            testSim.RunDiceSim(d6Type, numOfDicePerRoll+4, numOfSimulations);
+            testSim.RunDiceSim(d8Type, numOfDicePerRoll+4, numOfSimulations);
         }
     }
 }

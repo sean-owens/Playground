@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/Sean.Owen/Workspace/Playground/beeGameDiceSimulator/beeGameDiceSimulator/beeGameDiceSimulator.csproj": {}
+    "/Users/Sean.Owen/Workspace/github.com/sean-owens/Playground/beeGameDiceSimulator/beeGameDiceSimulator/beeGameDiceSimulator.csproj": {}
   },
   "projects": {
-    "/Users/Sean.Owen/Workspace/Playground/beeGameDiceSimulator/beeGameDiceSimulator/beeGameDiceSimulator.csproj": {
+    "/Users/Sean.Owen/Workspace/github.com/sean-owens/Playground/beeGameDiceSimulator/beeGameDiceSimulator/beeGameDiceSimulator.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/Sean.Owen/Workspace/Playground/beeGameDiceSimulator/beeGameDiceSimulator/beeGameDiceSimulator.csproj",
+        "projectUniqueName": "/Users/Sean.Owen/Workspace/github.com/sean-owens/Playground/beeGameDiceSimulator/beeGameDiceSimulator/beeGameDiceSimulator.csproj",
         "projectName": "beeGameDiceSimulator",
-        "projectPath": "/Users/Sean.Owen/Workspace/Playground/beeGameDiceSimulator/beeGameDiceSimulator/beeGameDiceSimulator.csproj",
+        "projectPath": "/Users/Sean.Owen/Workspace/github.com/sean-owens/Playground/beeGameDiceSimulator/beeGameDiceSimulator/beeGameDiceSimulator.csproj",
         "packagesPath": "/Users/Sean.Owen/.nuget/packages/",
-        "outputPath": "/Users/Sean.Owen/Workspace/Playground/beeGameDiceSimulator/beeGameDiceSimulator/obj/",
+        "outputPath": "/Users/Sean.Owen/Workspace/github.com/sean-owens/Playground/beeGameDiceSimulator/beeGameDiceSimulator/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/Sean.Owen/.config/NuGet/NuGet.Config"
