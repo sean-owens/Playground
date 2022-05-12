@@ -6,14 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Logs\" />
     <None Remove="Serilog" />
     <None Remove="Serilog.Sinks.File" />
     <None Remove="Serilog.Sinks.Console" />
     <None Remove="Serilog.Formatting.Compact" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Logs\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.11.0" />
