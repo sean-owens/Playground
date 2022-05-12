@@ -5,32 +5,20 @@
         static void Main(string[] args)
         {
             int numOfPlayers = 2;
-            int numOfDicePerRoll = 5;
-            int numOfSimulations = 1000;
+            int numOfDicePerRoll = 6;
+            int numOfSimulations = 10000;
 
             string d6Type = "D6";
             string d8Type = "D8";
 
             Simulation testSim = new Simulation();
 
-            //5 Dice
-            testSim.RunDiceSim(d6Type, numOfDicePerRoll, numOfSimulations);
-            testSim.RunDiceSim(d8Type, numOfDicePerRoll, numOfSimulations);
+            //Verify original test still works
+            //testSim.RunDiceSim(d6Type, numOfDicePerRoll, numOfSimulations);
 
-            //6 Dice
-            testSim.RunDiceSim(d6Type, numOfDicePerRoll+1, numOfSimulations);
-            testSim.RunDiceSim(d8Type, numOfDicePerRoll+1, numOfSimulations);
+            //Test Sim Game
+            testSim.PlaySimGame(numOfPlayers, numOfDicePerRoll, d6Type);
 
-            //7 Dice
-            testSim.RunDiceSim(d6Type, numOfDicePerRoll+2, numOfSimulations);
-            testSim.RunDiceSim(d8Type, numOfDicePerRoll+2, numOfSimulations);
-
-            //8 Dice
-            testSim.RunDiceSim(d6Type, numOfDicePerRoll+3, numOfSimulations);
-            testSim.RunDiceSim(d8Type, numOfDicePerRoll+3, numOfSimulations);
-
-            testSim.RunDiceSim(d6Type, numOfDicePerRoll+4, numOfSimulations);
-            testSim.RunDiceSim(d8Type, numOfDicePerRoll+4, numOfSimulations);
         }
     }
 }

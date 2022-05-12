@@ -1,18 +1,18 @@
 ﻿<Properties StartupConfiguration="{D3608D14-81E2-4581-BE3D-DB073B0FD169}|Default">
   <MonoDevelop.Ide.ItemProperties.beeGameDiceSimulator PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="beeGameDiceSimulator/PlayerModel.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="beeGameDiceSimulator/Simulation.cs">
     <Files>
-      <File FileName="beeGameDiceSimulator/Program.cs" Line="26" Column="21" />
-      <File FileName="beeGameDiceSimulator/Simulation.cs" Line="206" Column="13" />
+      <File FileName="beeGameDiceSimulator/Program.cs" Line="17" Column="15" />
+      <File FileName="beeGameDiceSimulator/Simulation.cs" Line="434" Column="91" />
       <File FileName="beeGameDiceSimulator/Config.cs" />
-      <File FileName="beeGameDiceSimulator/PlayerModel.cs" Line="1" Column="1" />
+      <File FileName="beeGameDiceSimulator/PlayerModel.cs" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="beeGameDiceSimulator" expanded="True">
             <Node name="beeGameDiceSimulator" expanded="True">
-              <Node name="PlayerModel.cs" selected="True" />
+              <Node name="Simulation.cs" selected="True" />
             </Node>
           </Node>
         </State>
@@ -22,7 +22,10 @@
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/Sean.Owen/Workspace/github.com/sean-owens/Playground/beeGameDiceSimulator/beeGameDiceSimulator/Simulation.cs" relfile="beeGameDiceSimulator/Simulation.cs" line="442" column="1" />
+      <Breakpoint file="/Users/Sean.Owen/Workspace/github.com/sean-owens/Playground/beeGameDiceSimulator/beeGameDiceSimulator/Simulation.cs" relfile="beeGameDiceSimulator/Simulation.cs" line="428" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
 </Properties>

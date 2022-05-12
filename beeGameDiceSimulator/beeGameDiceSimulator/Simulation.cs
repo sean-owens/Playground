@@ -45,7 +45,9 @@ namespace beeGameDiceSimulator
             {
                 string[] diceResults = RollDice(dice, diceType);
 
-                string result = PrintDiceResults(diceResults);
+                PrintDiceResults(diceResults,true);
+
+                string result = InterpretDiceResult(diceResults);
 
                 diceResultList.Add(result);
             }
@@ -83,7 +85,7 @@ namespace beeGameDiceSimulator
             return result;
         }
 
-        private string PrintDiceResults(string[] diceResult)
+        private void PrintDiceResults(string[] diceResult, bool printResult)
         {
             StringBuilder sb = new StringBuilder("Dice: [");
 
@@ -95,10 +97,17 @@ namespace beeGameDiceSimulator
                     sb.Append(" ");
                 }
             }
-            string result = InterpretDiceResult(diceResult);
-            sb.Append($"] Result: [{result}];");
+            if(printResult)
+            {
+                string result = InterpretDiceResult(diceResult);
+                sb.Append($"] Result: [{result}];");
+            }
+            else
+            {
+                sb.Append($"];");
+            }
+
             _log.Debug(sb.ToString());
-            return result;
         }
 
         private string InterpretDiceResult(string[] diceResults)
@@ -257,11 +266,15 @@ namespace beeGameDiceSimulator
                     {
                         nameValue = nameInput;
                     }
+                    else
+                    {
+                        Console.WriteLine($"Player with name \"{nameInput}\" already exists. Please choose another name.");
+                    }
                 }
                 
                 while(strategyIsValid==false)
                 {
-                    Console.WriteLine($"What is Player {i + 1}'s Default Strategy Type:\n");
+                    Console.WriteLine($"What is {nameValue}'s Default Strategy Type:\n");
                     Console.WriteLine("1 - Honey Focused\n2 - Bee Focused\n3 - HoneyComb Focused\n4 - No Strategy\n");
                     string strategyInput = Console.ReadLine();
 
@@ -271,11 +284,15 @@ namespace beeGameDiceSimulator
                     {
                         strategy = Convert.ToInt32(strategyInput);
                     }
+                    else
+                    {
+                        Console.WriteLine($"{strategyInput} is not a valid default strategy. Please enter 1, 2, 3, or 4");
+                    }
                 }
 
                 PlayerModel player = new PlayerModel(nameValue, strategy, GetDice(diceType,NumOfDicePerRoll), NumOfDicePerRoll);
                 _log.Debug($"Player Created: [Name:{nameValue}; Strategy:{TranslateStrategy(strategy)}; DiceType:{diceType};]");
-                _log.Information($"Welcome {nameValue}!");
+                _log.Information($"Welcome {nameValue}!\n");
                 Players.Add(player);
             }
 
@@ -285,6 +302,8 @@ namespace beeGameDiceSimulator
             int currentSeason = 0;
 
             int totalHoneyCollected = 0;
+
+            _log.Information("\nLet the game begin!\n");
 
             for (int i = 0; i <= lastTimeSpace; i++)
             {
@@ -299,13 +318,23 @@ namespace beeGameDiceSimulator
                 }
                 else
                 {
-                    _log.Information($"Current Time Space: {i + 1}/{numOfSpacesPerSeason} in {TranslateSeason(currentSeason)};");
+                    if(i%numOfSpacesPerSeason==0)
+                    {
+                        _log.Information($"Current Time Space: {numOfSpacesPerSeason}/{numOfSpacesPerSeason} in {TranslateSeason(currentSeason)};");
+                        currentSeason++;
+                    }
+                    else
+                    {
+                        _log.Information($"Current Time Space: {i % numOfSpacesPerSeason}/{numOfSpacesPerSeason} in {TranslateSeason(currentSeason)};");
+                    }
                 }
 
                 //Check if Honey Needs removed with Season Change
-                if(i%numOfSeasons==0 && i!=0 && i!=lastTimeSpace)
+                if(i%numOfSpacesPerSeason==1 && i!=0 && i!=1 && i!=lastTimeSpace)
                 {
-                    totalHoneyCollected = totalHoneyCollected - NumOfPlayers;
+                    _log.Information($"Current Honey Count: {totalHoneyCollected};");
+                    totalHoneyCollected -=  NumOfPlayers;
+                    _log.Information($"Removing {NumOfPlayers} honey on season change ...");
                 }
 
                 //Check Total Honey Collected
@@ -315,11 +344,10 @@ namespace beeGameDiceSimulator
                     break;
                 }
 
-                _log.Information($"Current Honey Count: {totalHoneyCollected};");
-
                 foreach (var player in Players)
                 {
-                    _log.Debug($" - {player.GetName()}'s Turn");
+                    _log.Information($"Current Honey Count: {totalHoneyCollected};\n");
+                    _log.Information($" - {player.GetName()}'s Turn");
 
                     //Reset Players Dice Set
                     player.SetDice(_config.CreateD6Dice(NumOfDicePerRoll));
@@ -331,7 +359,7 @@ namespace beeGameDiceSimulator
                     //Select Stategy
                     while (changeStrategyIsValid==false)
                     {
-                        Console.WriteLine($"Select a Strategy for this turn:\n1 - Default ({TranslateStrategy(player.GetStrategy())}\n2 - Different Strategy\n");
+                        Console.WriteLine($"Select a Strategy for this turn:\n1 - Default ({TranslateStrategy(player.GetStrategy())})\n2 - Different Strategy\n");
                         string strategyInput = Console.ReadLine();
 
                         changeStrategyIsValid = ValidateChangeStrategy(strategyInput);
@@ -351,11 +379,11 @@ namespace beeGameDiceSimulator
                                         Console.WriteLine("1 - Honey Focused\n2 - Bee Focused\n3 - HoneyComb Focused\n4 - No Strategy\n");
                                         string newStrategyInput = Console.ReadLine();
 
-                                        newStrategyIsValid = ValidateStrategy(strategyInput);
+                                        newStrategyIsValid = ValidateStrategy(newStrategyInput);
 
                                         if (newStrategyIsValid)
                                         {
-                                            turnStrategy = Convert.ToInt32(strategyInput);
+                                            turnStrategy = Convert.ToInt32(newStrategyInput);
 
                                             bool changeDefaultIsValid = false;
 
@@ -398,7 +426,11 @@ namespace beeGameDiceSimulator
                     {
                         string[] diceResult = RollDice(player.GetDice(), diceType);
 
-                        diceResultsKept = KeepDiceUsingStrategy(diceResult, player.GetStrategy());
+                        PrintDiceResultsToConsole(diceResult,false);
+
+                        diceResultsKept.AddRange(KeepDiceUsingStrategy(diceResult, turnStrategy));
+
+                        PrintKeptDiceToConsole(diceResultsKept.ToArray());
 
                         int currentKeptDiceCount = diceResultsKept.Count;
 
@@ -408,7 +440,7 @@ namespace beeGameDiceSimulator
                         }
                         else
                         {
-                            int activeDiceCount = NumOfDicePerRoll - currentKeptDiceCount;
+                            int activeDiceCount = NumOfDicePerRoll - diceResultsKept.Count;
                             player.SetDice(_config.CreateD6Dice(activeDiceCount));
                         }
                     }
@@ -416,9 +448,10 @@ namespace beeGameDiceSimulator
                     List<string> rollResults = ImprovedInterpretDiceResult(diceResultsKept.ToArray());
 
                     //Evaluate Results
-                    if(rollResults.Equals("Nothing"))
+
+                    if(rollResults.Contains("Nothing"))
                     {
-                        _log.Information($"Player {player.GetName()} received nothing :(");
+                        _log.Information($"Player {player.GetName()} received nothing :(\n");
                     }
                     else
                     {
@@ -428,7 +461,7 @@ namespace beeGameDiceSimulator
                             {
                                 int currentDiceCount = player.GetDiceCount();
                                 player.SetDiceCount(currentDiceCount++);
-                                _log.Information($"Player {player.GetName()} received a Bee!");
+                                _log.Information($"Player {player.GetName()} received a Bee!\n");
                             }
 
                             if (result.Equals("HoneyComb"))
@@ -456,8 +489,7 @@ namespace beeGameDiceSimulator
                                         totalHoneyCollected = _config.GetOuterRingTotal();
                                     }
                                 }
-                                _log.Information($"Player {player.GetName()} received a HoneyComb!");
-                                _log.Information($"Current Honey Count: {totalHoneyCollected};");
+                                _log.Information($"Player {player.GetName()} received a HoneyComb!\n");
                             }
 
                             if (result.Equals("Honey"))
@@ -486,19 +518,24 @@ namespace beeGameDiceSimulator
                                     }
                                 }
 
-                                _log.Information($"Player {player.GetName()} received a Honey!");
-                                _log.Information($"Current Honey Count: {totalHoneyCollected};");
+                                _log.Information($"Player {player.GetName()} received a Honey!\n");
                             }
                         }
                     }
                 }
             }
 
-            if(NumOfPlayers<4)
+            _log.Information($"Final Honey Count: {totalHoneyCollected};");
+
+            if (NumOfPlayers<4)
             {
                 if(totalHoneyCollected.Equals(_config.GetInnerRingTotal()))
                 {
                     _log.Information("Players Win! Congratulations\n");
+                }
+                else
+                {
+                    _log.Information("Players Lose! Game Over :(\n");
                 }
             }
             else if(NumOfPlayers<6)
@@ -507,10 +544,10 @@ namespace beeGameDiceSimulator
                 {
                     _log.Information("Players Win! Congratulations\n");
                 }
-            }
-            else
-            {
-                _log.Information("Players Lose! Game Over :(\n");
+                else
+                {
+                    _log.Information("Players Lose! Game Over :(\n");
+                }
             }
 
             _log.Information("Simulation Completed");
@@ -883,7 +920,47 @@ namespace beeGameDiceSimulator
             return keptResults;
         }
 
+        private void PrintDiceResultsToConsole(string[] diceResult, bool printResult)
+        {
+            StringBuilder sb = new StringBuilder("Dice: [");
 
+            for (int i = 0; i < diceResult.Length; i++)
+            {
+                sb.Append(diceResult[i]);
+                if (i < diceResult.Length - 1)
+                {
+                    sb.Append(" ");
+                }
+            }
+            if (printResult)
+            {
+                string result = InterpretDiceResult(diceResult);
+                sb.Append($"] Result: [{result}];");
+            }
+            else
+            {
+                sb.Append($"];");
+            }
+
+            _log.Information(sb.ToString());
+        }
+
+        private void PrintKeptDiceToConsole(string[] keptDice)
+        {
+            StringBuilder sb = new StringBuilder(" - Kept Dice: [");
+
+            for (int i = 0; i < keptDice.Length; i++)
+            {
+                sb.Append(keptDice[i]);
+                if (i < keptDice.Length - 1)
+                {
+                    sb.Append(" ");
+                }
+            }
+            
+            sb.Append($"];");
+            _log.Information(sb.ToString());
+        }
         #endregion
     }
 }
