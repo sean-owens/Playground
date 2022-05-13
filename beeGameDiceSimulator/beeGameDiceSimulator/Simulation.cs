@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using Serilog;
-using Serilog.Events;
 
 namespace beeGameDiceSimulator
 {
@@ -12,6 +10,8 @@ namespace beeGameDiceSimulator
         private Config _config;
 
         private ILogger _log;
+        private string _infoLogLevel = "Info";
+        private string _debugLogLevel = "Debug";
 
         private readonly Random _rdmGenerator;
 
@@ -340,7 +340,6 @@ namespace beeGameDiceSimulator
                 //Check Total Honey Collected
                 if (totalHoneyCollected < 0)
                 {
-                    _log.Information("Players Lose! Game Over :(\n");
                     break;
                 }
 
@@ -426,11 +425,11 @@ namespace beeGameDiceSimulator
                     {
                         string[] diceResult = RollDice(player.GetDice(), diceType);
 
-                        PrintDiceResultsToConsole(diceResult,false);
+                        PrintDiceResultsToConsole(_infoLogLevel, diceResult, false);
 
                         diceResultsKept.AddRange(KeepDiceUsingStrategy(diceResult, turnStrategy));
 
-                        PrintKeptDiceToConsole(diceResultsKept.ToArray());
+                        PrintKeptDiceToConsole(_infoLogLevel, diceResultsKept.ToArray());
 
                         int currentKeptDiceCount = diceResultsKept.Count;
 
@@ -468,6 +467,8 @@ namespace beeGameDiceSimulator
                             {
                                 if (NumOfPlayers < 4)
                                 {
+                                    totalHoneyCollected += 3;
+                                    /*
                                     if (totalHoneyCollected < (_config.GetInnerRingTotal() - 3))
                                     {
                                         totalHoneyCollected += 3;
@@ -476,10 +477,12 @@ namespace beeGameDiceSimulator
                                     {
                                         totalHoneyCollected = _config.GetInnerRingTotal();
                                     }
-
+                                    */
                                 }
                                 else if (NumOfPlayers >= 4 && NumOfPlayers <= 6)
                                 {
+                                    totalHoneyCollected += 3;
+                                    /*
                                     if (totalHoneyCollected < (_config.GetOuterRingTotal() - 3))
                                     {
                                         totalHoneyCollected += 3;
@@ -488,6 +491,7 @@ namespace beeGameDiceSimulator
                                     {
                                         totalHoneyCollected = _config.GetOuterRingTotal();
                                     }
+                                    */
                                 }
                                 _log.Information($"Player {player.GetName()} received a HoneyComb!\n");
                             }
@@ -496,6 +500,8 @@ namespace beeGameDiceSimulator
                             {
                                 if (NumOfPlayers < 4)
                                 {
+                                    totalHoneyCollected++;
+                                    /*
                                     if (totalHoneyCollected < (_config.GetInnerRingTotal() - 1))
                                     {
                                         totalHoneyCollected++;
@@ -504,10 +510,12 @@ namespace beeGameDiceSimulator
                                     {
                                         totalHoneyCollected = _config.GetInnerRingTotal();
                                     }
-
+                                    */
                                 }
                                 else if (NumOfPlayers >= 4 && NumOfPlayers <= 6)
                                 {
+                                    totalHoneyCollected++;
+                                    /*
                                     if (totalHoneyCollected < (_config.GetOuterRingTotal() - 1))
                                     {
                                         totalHoneyCollected++;
@@ -516,6 +524,7 @@ namespace beeGameDiceSimulator
                                     {
                                         totalHoneyCollected = _config.GetOuterRingTotal();
                                     }
+                                    */
                                 }
 
                                 _log.Information($"Player {player.GetName()} received a Honey!\n");
@@ -529,7 +538,7 @@ namespace beeGameDiceSimulator
 
             if (NumOfPlayers<4)
             {
-                if(totalHoneyCollected.Equals(_config.GetInnerRingTotal()))
+                if(totalHoneyCollected>=(_config.GetInnerRingTotal()))
                 {
                     _log.Information("Players Win! Congratulations\n");
                 }
@@ -540,7 +549,7 @@ namespace beeGameDiceSimulator
             }
             else if(NumOfPlayers<6)
             {
-                if (totalHoneyCollected.Equals(_config.GetOuterRingTotal()))
+                if (totalHoneyCollected>=(_config.GetOuterRingTotal()))
                 {
                     _log.Information("Players Win! Congratulations\n");
                 }
@@ -553,7 +562,345 @@ namespace beeGameDiceSimulator
             _log.Information("Simulation Completed");
         }
 
-        #region Stuff for PlaySimGame
+        public void SimulateAutoGame(int NumOfSimulations, List<(string,string)> PlayerNamesAndStrategy, int NumOfDicePerRoll, string diceType)
+        {
+            List<PlayerModel> players = new List<PlayerModel>();
+
+            foreach(var values in PlayerNamesAndStrategy)
+            {
+                string name = values.Item1;
+                string strategy = values.Item2;
+
+                if(diceType.Equals("D6"))
+                {
+                    players.Add(new PlayerModel(name, GetStrategyInt(strategy), _config.CreateD6Dice(NumOfDicePerRoll), NumOfDicePerRoll));
+                }
+                else if(diceType.Equals("D8"))
+                {
+                    players.Add(new PlayerModel(name, GetStrategyInt(strategy), _config.CreateD8Dice(NumOfDicePerRoll), NumOfDicePerRoll));
+                }
+                
+            }
+
+            //_log.Information($"Auto Simulation with {players.Count} players each using {NumOfDicePerRoll} {diceType} per roll beginning ...");
+            _log.Information($"{players.Count} players using {NumOfDicePerRoll} {diceType}");
+
+            List<(int, bool)> resultsList = new List<(int, bool)>();
+
+            for (int i = 0; i < NumOfSimulations; i++)
+            {
+                resultsList.Add(PlayAutoSimGame(players, NumOfDicePerRoll, diceType));
+            }
+
+            PrintSummaryOfResults(resultsList);
+        }
+
+        private (int,bool) PlayAutoSimGame(List<PlayerModel> Players, int NumOfDicePerRoll, string diceType)
+        {
+            bool playersWon = false;
+
+            int NumOfPlayers = Players.Count;
+
+            //Beginning Simulation
+            _log.Debug($"Simulation Beginning with {NumOfPlayers} players each with {NumOfDicePerRoll} {diceType} dice ...");
+
+            int lastTimeSpace = _config.GetNumOfTimeSpaces();
+            int numOfSpacesPerSeason = _config.GetNumOfSpacesPerSeason();
+            int numOfSeasons = _config.GetNumOfSeasons();
+            int currentSeason = 0;
+
+            int totalHoneyCollected = 0;
+
+            _log.Debug("\nLet the game begin!\n");
+
+            for (int i = 0; i <= lastTimeSpace; i++)
+            {
+                //Time Space Printout
+                if (i.Equals(0))
+                {
+                    _log.Debug($"Current Time Space: Start!");
+                }
+                else if (i.Equals(lastTimeSpace))
+                {
+                    _log.Debug($"Current Time Space: Last Round!");
+                }
+                else
+                {
+                    if (i % numOfSpacesPerSeason == 0)
+                    {
+                        _log.Debug($"Current Time Space: {numOfSpacesPerSeason}/{numOfSpacesPerSeason} in {TranslateSeason(currentSeason)};");
+                        currentSeason++;
+                    }
+                    else
+                    {
+                        _log.Debug($"Current Time Space: {i % numOfSpacesPerSeason}/{numOfSpacesPerSeason} in {TranslateSeason(currentSeason)};");
+                    }
+                }
+
+                //Check if Honey Needs removed with Season Change
+                if (i % numOfSpacesPerSeason == 1 && i != 0 && i != 1 && i != lastTimeSpace)
+                {
+                    _log.Debug($"Current Honey Count: {totalHoneyCollected};");
+                    totalHoneyCollected -= NumOfPlayers;
+                    _log.Debug($"Removing {NumOfPlayers} honey on season change ...");
+                }
+
+                //Check Total Honey Collected
+                if (totalHoneyCollected < 0)
+                {
+                    break;
+                }
+
+                foreach (var player in Players)
+                {
+                    _log.Debug($"Current Honey Count: {totalHoneyCollected};\n");
+                    _log.Debug($" - {player.GetName()}'s Turn");
+
+                    //Reset Players Dice Set
+                    if(diceType.Equals("D6"))
+                    {
+                        player.SetDice(_config.CreateD6Dice(NumOfDicePerRoll));
+                    }
+                    else if(diceType.Equals("D8"))
+                    {
+                        player.SetDice(_config.CreateD8Dice(NumOfDicePerRoll));
+                    }
+                    
+                    //Get Default Strategy
+                    int turnStrategy = player.GetStrategy();
+
+                    int rollAttemptMax = 3;
+                    List<string> diceResultsKept = new List<string>();
+
+                    for (int j = 0; j < rollAttemptMax; j++)
+                    {
+                        string[] diceResult = RollDice(player.GetDice(), diceType);
+
+                        PrintDiceResultsToConsole(_debugLogLevel, diceResult, false);
+
+                        diceResultsKept.AddRange(KeepDiceUsingStrategy(diceResult, turnStrategy));
+
+                        PrintKeptDiceToConsole(_debugLogLevel, diceResultsKept.ToArray());
+
+                        int currentKeptDiceCount = diceResultsKept.Count;
+
+                        if (currentKeptDiceCount.Equals(NumOfDicePerRoll))
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            int activeDiceCount = NumOfDicePerRoll - diceResultsKept.Count;
+
+                            if(diceType.Equals("D6"))
+                            {
+                                player.SetDice(_config.CreateD6Dice(activeDiceCount));
+                            }
+                            else if (diceType.Equals("D8"))
+                            {
+                                player.SetDice(_config.CreateD8Dice(activeDiceCount));
+                            }
+                        }
+                    }
+
+                    List<string> rollResults = ImprovedInterpretDiceResult(diceResultsKept.ToArray());
+
+                    //Evaluate Results
+
+                    if (rollResults.Contains("Nothing"))
+                    {
+                        _log.Debug($"Player {player.GetName()} received nothing :(\n");
+                    }
+                    else
+                    {
+                        foreach (string result in rollResults)
+                        {
+                            if (result.Equals("Bee"))
+                            {
+                                int currentDiceCount = player.GetDiceCount();
+                                player.SetDiceCount(currentDiceCount++);
+                                _log.Debug($"Player {player.GetName()} received a Bee!\n");
+                            }
+
+                            if (result.Equals("HoneyComb"))
+                            {
+                                if (NumOfPlayers < 4)
+                                {
+                                    totalHoneyCollected += 3;
+                                    /*
+                                    if (totalHoneyCollected < (_config.GetInnerRingTotal() - 3))
+                                    {
+                                        totalHoneyCollected += 3;
+                                    }
+                                    else
+                                    {
+                                        totalHoneyCollected = _config.GetInnerRingTotal();
+                                    }
+                                    */
+                                }
+                                else if (NumOfPlayers >= 4 && NumOfPlayers <= 6)
+                                {
+                                    totalHoneyCollected += 3;
+                                    /*
+                                    if (totalHoneyCollected < (_config.GetOuterRingTotal() - 3))
+                                    {
+                                        totalHoneyCollected += 3;
+                                    }
+                                    else
+                                    {
+                                        totalHoneyCollected = _config.GetOuterRingTotal();
+                                    }
+                                    */
+                                }
+                                _log.Debug($"Player {player.GetName()} received a HoneyComb!\n");
+                            }
+
+                            if (result.Equals("Honey"))
+                            {
+                                if (NumOfPlayers < 4)
+                                {
+                                    totalHoneyCollected++;
+                                    /*
+                                    if (totalHoneyCollected < (_config.GetInnerRingTotal() - 1))
+                                    {
+                                        totalHoneyCollected++;
+                                    }
+                                    else
+                                    {
+                                        totalHoneyCollected = _config.GetInnerRingTotal();
+                                    }
+                                    */
+                                }
+                                else if (NumOfPlayers >= 4 && NumOfPlayers <= 6)
+                                {
+                                    totalHoneyCollected++;
+                                    /*
+                                    if (totalHoneyCollected < (_config.GetOuterRingTotal() - 1))
+                                    {
+                                        totalHoneyCollected++;
+                                    }
+                                    else
+                                    {
+                                        totalHoneyCollected = _config.GetOuterRingTotal();
+                                    }
+                                    */
+                                }
+
+                                _log.Debug($"Player {player.GetName()} received a Honey!\n");
+                            }
+                        }
+                    }
+                }
+            }
+
+            _log.Debug($"Final Honey Count: {totalHoneyCollected};");
+
+            if (NumOfPlayers < 4)
+            {
+                if (totalHoneyCollected>=(_config.GetInnerRingTotal()))
+                {
+                    _log.Debug("Players Win! Congratulations\n");
+                    playersWon = true;
+                }
+                else
+                {
+                    _log.Debug("Players Lose! Game Over :(\n");
+                }
+            }
+            else if (NumOfPlayers < 6)
+            {
+                if (totalHoneyCollected>=(_config.GetOuterRingTotal()))
+                {
+                    _log.Debug("Players Win! Congratulations\n");
+                    playersWon = true;
+                }
+                else
+                {
+                    _log.Debug("Players Lose! Game Over :(\n");
+                }
+            }
+
+            _log.Debug("Simulation Completed");
+            return (totalHoneyCollected, playersWon);
+        }
+
+        #region Stuff for SimulateAutoGame/PlayAutoSimGame
+        private int GetStrategyInt(string strategy)
+        {
+            switch (strategy.ToLower())
+            {
+                case "honey":
+                    {
+                        return 1;
+                    }
+                case "bee":
+                    {
+                        return 2;
+                    }
+                case "honeycomb":
+                    {
+                        return 3;
+                    }
+                case "none":
+                    {
+                        return 4;
+                    }
+                default:
+                    {
+                        return 1;
+                    }
+            }
+        }
+
+        private void PrintSummaryOfResults(List<(int,bool)> resultList)
+        {
+            double playerWonCount = 0;
+            double playerLoseCount = 0;
+
+            double playerWinHoneyCountTotal = 0;
+            double playerLoseHoneyCountTotal = 0;
+
+            foreach(var value in resultList)
+            {
+                double honeyCount = value.Item1;
+                bool playersWon = value.Item2;
+
+                if(playersWon)
+                {
+                    playerWonCount++;
+                    playerWinHoneyCountTotal += honeyCount;
+                }
+                else
+                {
+                    playerLoseCount++;
+                    playerLoseHoneyCountTotal += honeyCount;
+                }
+            }
+
+            double winHoneyCountAvg = 0; 
+            double loseHoneyCountAvg = 0; 
+
+            if(playerWonCount>0)
+            {
+                winHoneyCountAvg = playerWinHoneyCountTotal / playerWonCount;
+            }
+
+            if(playerLoseCount>0)
+            {
+                loseHoneyCountAvg = playerLoseHoneyCountTotal / playerLoseCount;
+            }
+
+            /*
+            _log.Information($"Summary from {resultList.Count} simulated games...");
+            _log.Information($" - Players won {(playerWonCount/((double)resultList.Count)).ToString("P")} with {winHoneyCountAvg} total honey per win.");
+            _log.Information($" - Players lost {(playerLoseCount / ((double)resultList.Count)).ToString("P")} with {loseHoneyCountAvg} total honey per loss.");
+            */
+
+            _log.Information($"Summary:\n" +
+                $" - Won:{(playerWonCount / ((double)resultList.Count)).ToString("P")}; TotalHoney:{winHoneyCountAvg};\n" +
+                $" - Lost:{(playerLoseCount / ((double)resultList.Count)).ToString("P")}; TotalHoney:{loseHoneyCountAvg};\n");
+        }
+
         private bool ValidateNumOfPlayers(int numOfPlayers)
         {
             if(2 <= numOfPlayers && numOfPlayers <= 6)
@@ -581,7 +928,7 @@ namespace beeGameDiceSimulator
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -610,7 +957,7 @@ namespace beeGameDiceSimulator
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -631,7 +978,7 @@ namespace beeGameDiceSimulator
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -650,7 +997,7 @@ namespace beeGameDiceSimulator
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -920,7 +1267,7 @@ namespace beeGameDiceSimulator
             return keptResults;
         }
 
-        private void PrintDiceResultsToConsole(string[] diceResult, bool printResult)
+        private void PrintDiceResultsToConsole(string logLevel, string[] diceResult, bool printResult)
         {
             StringBuilder sb = new StringBuilder("Dice: [");
 
@@ -942,10 +1289,17 @@ namespace beeGameDiceSimulator
                 sb.Append($"];");
             }
 
-            _log.Information(sb.ToString());
+            if(logLevel.ToLower().Equals("info"))
+            {
+                _log.Information(sb.ToString());
+            }
+            else if(logLevel.ToLower().Equals("debug"))
+            {
+                _log.Debug(sb.ToString());
+            }
         }
 
-        private void PrintKeptDiceToConsole(string[] keptDice)
+        private void PrintKeptDiceToConsole(string logLevel, string[] keptDice)
         {
             StringBuilder sb = new StringBuilder(" - Kept Dice: [");
 
@@ -959,7 +1313,15 @@ namespace beeGameDiceSimulator
             }
             
             sb.Append($"];");
-            _log.Information(sb.ToString());
+
+            if (logLevel.ToLower().Equals("info"))
+            {
+                _log.Information(sb.ToString());
+            }
+            else if (logLevel.ToLower().Equals("debug"))
+            {
+                _log.Debug(sb.ToString());
+            }
         }
         #endregion
     }
